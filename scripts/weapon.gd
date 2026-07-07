@@ -12,9 +12,9 @@ var current_clip: int = 8
 var is_reloading: bool = false
 var fire_cooldown: float = 0.0
 
-@onready var muzzle_flash: Node3D = $MuzzleFlash
-@onready var shoot_sound: AudioStreamPlayer3D = $ShootSound
-@onready var weapon_mesh: MeshInstance3D = $WeaponMesh
+@onready var muzzle_flash: Node3D = $MuzzleFlash if has_node("MuzzleFlash") else null
+@onready var shoot_sound: AudioStreamPlayer3D = $ShootSound if has_node("ShootSound") else null
+@onready var weapon_mesh: MeshInstance3D = $WeaponMesh if has_node("WeaponMesh") else null
 
 func _ready():
 	current_clip = clip_size
@@ -37,13 +37,14 @@ func shoot() -> bool:
 	_shoot_animation()
 	
 	# Sound
-	if is_silenced:
-		shoot_sound.pitch_scale = 0.8
-		shoot_sound.volume_db = -20
-	else:
-		shoot_sound.pitch_scale = 1.0
-		shoot_sound.volume_db = 0
-	shoot_sound.play()
+	if shoot_sound:
+		if is_silenced:
+			shoot_sound.pitch_scale = 0.8
+			shoot_sound.volume_db = -20
+		else:
+			shoot_sound.pitch_scale = 1.0
+			shoot_sound.volume_db = 0
+		shoot_sound.play()
 	
 	# Stealth penalty — unsilenced shots alert nearby enemies
 	if not is_silenced:
@@ -53,14 +54,16 @@ func shoot() -> bool:
 
 func _shoot_animation():
 	# Recoil animation
-	var tween = create_tween()
-	tween.tween_property(weapon_mesh, "position:y", -0.02, 0.05)
-	tween.tween_property(weapon_mesh, "position:y", 0.0, 0.1)
+	if weapon_mesh:
+		var tween = create_tween()
+		tween.tween_property(weapon_mesh, "position:y", -0.02, 0.05)
+		tween.tween_property(weapon_mesh, "position:y", 0.0, 0.1)
 	
 	# Muzzle flash
-	muzzle_flash.visible = true
-	await get_tree().create_timer(0.05).timeout
-	muzzle_flash.visible = false
+	if muzzle_flash:
+		muzzle_flash.visible = true
+		await get_tree().create_timer(0.05).timeout
+		muzzle_flash.visible = false
 
 func reload():
 	if is_reloading or current_clip == clip_size or GameManager.ammo <= 0:
@@ -68,9 +71,10 @@ func reload():
 	
 	is_reloading = true
 	# Animation
-	var tween = create_tween()
-	tween.tween_property(weapon_mesh, "position:y", -0.3, reload_time * 0.5)
-	tween.tween_property(weapon_mesh, "position:y", 0.0, reload_time * 0.5)
+	if weapon_mesh:
+		var tween = create_tween()
+		tween.tween_property(weapon_mesh, "position:y", -0.3, reload_time * 0.5)
+		tween.tween_property(weapon_mesh, "position:y", 0.0, reload_time * 0.5)
 	
 	await get_tree().create_timer(reload_time * 0.5).timeout
 	

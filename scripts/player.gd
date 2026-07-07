@@ -28,7 +28,7 @@ var head_bob_time: float = 0.0
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
 @onready var weapon: Node3D = $Head/Camera3D/Weapon
-@onready var footstep_timer: Timer = $FootstepTimer
+@onready var footstep_timer: Timer = $FootstepTimer if has_node("FootstepTimer") else null
 @onready var stealth_check: Area3D = $StealthCheck
 
 func _ready():
@@ -128,7 +128,7 @@ func _update_stealth(delta: float):
 	is_stealthed = noise_level < 0.2
 	
 	# Footstep sounds
-	if move_magnitude > 0.5 and footstep_timer.is_stopped():
+	if move_magnitude > 0.5 and footstep_timer and footstep_timer.is_stopped():
 		footstep_timer.wait_time = 0.5 / max(move_magnitude * 0.5, 0.1)
 		footstep_timer.start()
 
