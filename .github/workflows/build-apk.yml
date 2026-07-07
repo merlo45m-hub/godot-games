@@ -48,26 +48,30 @@ jobs:
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Create Builds Directory
-        run: mkdir -p builds
+        run: |
+          mkdir -p ${{ github.workspace }}/builds
 
       - name: Export Android APK (Debug)
         id: export
         continue-on-error: true
         run: |
-          godot --headless --export-debug "Android" builds/agent007-debug.apk 2>&1
+          godot --headless --export-debug "Android" ${{ github.workspace }}/builds/agent007-debug.apk 2>&1
+          echo "=== Checking for APK ==="
+          find ${{ github.workspace }}/builds -name "*.apk" -ls 2>/dev/null || echo "No APK found in builds/"
+          ls -la ${{ github.workspace }}/builds/ 2>/dev/null
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
 
       - name: Export Android APK (Release)
         if: steps.export.outcome == 'success'
         run: |
-          godot --headless --export-release "Android" builds/agent007-release.apk 2>&1
+          godot --headless --export-release "Android" ${{ github.workspace }}/builds/agent007-release.apk 2>&1
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: agent007-apk
-          path: builds/*.apk
+          path: ${{ github.workspace }}/builds/*.apk
           if-no-files-found: error
 
       - name: List Build Output
