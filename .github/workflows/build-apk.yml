@@ -17,20 +17,23 @@ jobs:
 
       - name: Download Godot Headless
         run: |
-          wget -q https://github.com/godotengine/godot/releases/download/4.4-stable/Godot_v4.4-stable_linux.x86_64.zip
-          unzip -q Godot_v4.4-stable_linux.x86_64.zip
-          chmod +x Godot_v4.4-stable_linux.x86_64
-          mv Godot_v4.4-stable_linux.x86_64 /usr/local/bin/godot
+          GODOT_VERSION="4.4"
+          GODOT_FULL="4.4-stable"
+          wget -q https://github.com/godotengine/godot/releases/download/$GODOT_FULL/Godot_v${GODOT_FULL}_linux.x86_64.zip
+          unzip -q Godot_v${GODOT_FULL}_linux.x86_64.zip
+          chmod +x Godot_v${GODOT_FULL}_linux.x86_64
+          mv Godot_v${GODOT_FULL}_linux.x86_64 /usr/local/bin/godot
           godot --version
 
       - name: Download Android Export Templates
         run: |
-          mkdir -p ~/.godot/export_templates
-          wget -q https://github.com/godotengine/godot/releases/download/4.4-stable/Godot_v4.4-stable_export_templates.tpz
-          unzip -q Godot_v4.4-stable_export_templates.tpz -d ~/.godot/export_templates/
-          mv ~/.godot/export_templates/templates/* ~/.godot/export_templates/
-          rm -rf ~/.godot/export_templates/templates
-          ls ~/.godot/export_templates/
+          GODOT_FULL="4.4-stable"
+          mkdir -p ~/.godot/export_templates/$GODOT_FULL
+          wget -q https://github.com/godotengine/godot/releases/download/$GODOT_FULL/Godot_v${GODOT_FULL}_export_templates.tpz
+          unzip -q Godot_v${GODOT_FULL}_export_templates.tpz
+          mv templates/* ~/.godot/export_templates/$GODOT_FULL/
+          rm -rf templates
+          ls ~/.godot/export_templates/$GODOT_FULL/
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
