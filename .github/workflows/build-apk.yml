@@ -6,15 +6,23 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  export-android:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: abarichello/godot-ci@v4
-        with:
-          version: "4.2"
-          export-template: true
+      - name: Download Godot
+        run: |
+          wget -qO godot.zip https://github.com/godotengine/godot/releases/download/4.2-stable/Godot_v4.2-stable_linux.x86_64.zip
+          unzip -qo godot.zip
+          chmod +x Godot_v4.2-stable_linux.x86_64
+
+      - name: Export Templates
+        run: |
+          mkdir -p $HOME/.godot/export_templates/4.2-stable
+          wget -qO templates.tpz https://github.com/godotengine/godot/releases/download/4.2-stable/Godot_v4.2-stable_export_templates.tpz
+          unzip -qo templates.tpz
+          mv templates/* $HOME/.godot/export_templates/4.2-stable/
 
       - uses: android-actions/setup-android@v3
 
@@ -25,9 +33,10 @@ jobs:
 
       - run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - run: |
+      - name: Export APK
+        run: |
           mkdir -p builds
-          godot --headless --export-debug "Android" builds/agent007.apk
+          ./Godot_v4.2-stable_linux.x86_64 --headless --export-debug "Android" builds/agent007.apk
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
 
