@@ -3,9 +3,6 @@ name: Build Android APK
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'agent007/**'
-      - '.github/workflows/build-apk.yml'
   workflow_dispatch:
 
 jobs:
@@ -18,8 +15,11 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install p4a
-        run: pip install python-for-android cython
+      - name: Install tools
+        run: |
+          pip install python-for-android cython
+          # Check what p4a expects
+          python3 -m pythonforandroid.toolchain apk --help 2>&1 | head -3 || true
 
       - name: Build APK
         run: |
@@ -34,9 +34,10 @@ jobs:
             --permission VIBRATE \
             --window \
             --dist-name agent007 \
-            --output builds/
+            --output builds/ 2>&1 | tail -30
 
       - uses: actions/upload-artifact@v4
         with:
           name: agent007-apk
           path: builds/*.apk
+          if-no-files-found: error
