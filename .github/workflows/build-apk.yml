@@ -38,16 +38,30 @@ jobs:
       - name: Export APK
         run: |
           mkdir -p builds
+          echo "=== PROJECT STRUCTURE ==="
+          ls -la
+          echo ""
+          echo "=== PROJECT.GODOT ==="
+          cat project.godot
+          echo ""
+          echo "=== EXPORT PRESETS ==="
+          cat export_presets.cfg
+          echo ""
+          echo "=== RUNNING EXPORT ==="
           godot --headless --path . --export-debug "Android" builds/agent007.apk 2>&1
-          echo "=== BUILD OUTPUT ==="
-          find . -name "*.apk" -ls 2>/dev/null
-          ls -la builds/ 2>/dev/null
+          EXITCODE=$?
+          echo "EXIT_CODE=$EXITCODE"
+          echo ""
+          echo "=== SEARCHING FOR APK ==="
+          find / -name "*.apk" 2>/dev/null
+          echo ""
+          echo "=== BUILDS DIR ==="
+          ls -la builds/ 2>/dev/null || echo "builds/ missing"
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
 
       - uses: actions/upload-artifact@v4
         with:
           name: agent007-apk
-          path: |
-            builds/*.apk
-            *.apk
+          path: builds/*.apk
+          if-no-files-found: error
