@@ -5,6 +5,10 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+env:
+  GODOT_VERSION: "4.2"
+  GODOT_RELEASE: "4.2-stable"
+
 jobs:
   export-android:
     runs-on: ubuntu-latest
@@ -13,11 +17,41 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Godot
-        uses: abarichello/godot-ci@v4
-        with:
-          version: "4.2"
-          export-template: true
+      - name: Download Godot
+        run: |
+          echo "Downloading Godot ${{ env.GODOT_RELEASE }}..."
+          wget -qO godot.zip "https://github.com/godotengine/godot/releases/download/${{ env.GODOT_RELEASE }}/Godot_v${{ env.GODOT_RELEASE }}_linux.x86_64.zip"
+          unzip -qo godot.zip
+          ls -la
+          echo "Binary name:"
+          ls Godot_v${{ env.GODOT_RELEASE }}_linux.x86_64 2>/dev/null || ls *.x86_64 2>/dev/null || echo "checking other names..."
+
+      - name: Setup Godot Binary
+        run: |
+          BIN=$(ls Godot_v*_linux.x86_64 2>/dev/null | head -1)
+          if [ -z "$BIN" ]; then
+            # Try headless naming
+            BIN=$(ls Godot_v*_linux_headless* 2>/dev/null | head -1)
+          fi
+          if [ -z "$BIN" ]; then
+            echo "Available files:"
+            ls -la
+            exit 1
+          fi
+          chmod +x "$BIN"
+          sudo mv "$BIN" /usr/local/bin/godot
+          godot --version
+
+      - name: Export Templates
+        run: |
+          TEMPLATES_DIR="$HOME/.godot/export_templates/${{ env.GODOT_RELEASE }}"
+          mkdir -p "$TEMPLATES_DIR"
+          wget -qO templates.tpz "https://github.com/godotengine/godot/releases/download/${{ env.GODOT_RELEASE }}/Godot_v${{ env.GODOT_RELEASE }}_export_templates.tpz"
+          unzip -qo templates.tpz -d templates/
+          mv templates/templates/* "$TEMPLATES_DIR/"
+          rm -rf templates templates.tpz
+          echo "Templates installed to $TEMPLATES_DIR"
+          ls "$TEMPLATES_DIR"
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -28,17 +62,19 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Accept Android Licenses
-        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-
-      - name: Export Android APK
+      - name: Export APK
         run: |
           mkdir -p builds
           godot --headless --export-debug "Android" builds/agent007.apk 2>&1
-          ls -la builds/
+          echo "EXIT_CODE=$?"
+          echo "--- Build output ---"
+          ls -la builds/ 2>/dev/null || echo "No builds/ dir"
+          find . -name "*.apk" 2>/dev/null
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: agent007-apk
-          path: builds/*.apk
+          path: |
+            builds/*.apk
+            *.apk
