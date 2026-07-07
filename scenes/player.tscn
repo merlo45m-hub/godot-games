@@ -1,46 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://player"]
-
-[sub_resource type="CapsuleShape3D" id="PlayerShape"]
-radius = 0.4
-height = 1.4
-
-[sub_resource type="SphereMesh" id="HeadMesh"]
-radius = 0.3
-height = 0.3
-
-[sub_resource type="BoxMesh" id="BodyMesh"]
-size = Vector3(0.6, 1.4, 0.4)
-
-[sub_resource type="StandardMaterial3D" id="PlayerMat"]
-albedo_color = Color(0.2, 0.2, 0.4, 1)
-metallic = 0.0
-roughness = 0.8
+[gd_scene format=3 uid="uid://player"]
 
 [node name="Player" type="CharacterBody3D"]
 groups = ["player"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource("PlayerShape")
-
-[node name="Head" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
-
-[node name="Camera3D" type="Camera3D" parent="Head"]
-fov = 75.0
+[node name="Camera3D" type="Camera3D" parent="."]
 current = true
-
-[node name="BodyMesh" type="MeshInstance3D" parent="."]
-mesh = SubResource("BodyMesh")
-material_override = SubResource("PlayerMat")
-
-[node name="FootstepTimer" type="Timer" parent=".""]
-one_shot = true
-wait_time = 0.5
-
-[node name="StealthCheck" type="Area3D" parent="."]
-monitoring = true
-
-[editable path="StealthCheck"]
-
-[node name="CollisionShape3D2" type="CollisionShape3D" parent="StealthCheck"]
-shape = SubResource("PlayerShape")
