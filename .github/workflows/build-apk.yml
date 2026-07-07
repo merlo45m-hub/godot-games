@@ -3,60 +3,40 @@ name: Build Android APK
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'agent007/**'
+      - '.github/workflows/build-apk.yml'
   workflow_dispatch:
 
 jobs:
-  export-android:
+  build-apk:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download Godot 4.2
-        run: |
-          wget -q https://github.com/godotengine/godot/releases/download/4.2-stable/Godot_v4.2-stable_linux.x86_64.zip
-          unzip -q Godot_v4.2-stable_linux.x86_64.zip
-          chmod +x Godot_v4.2-stable_linux.x86_64
-          echo "BIN=$(ls Godot_v*_linux.x86_64)" >> $GITHUB_ENV
-
-      - name: Export templates
-        run: |
-          mkdir -p ~/.godot/export_templates/4.2-stable
-          wget -q https://github.com/godotengine/godot/releases/download/4.2-stable/Godot_v4.2-stable_export_templates.tpz -O t.tpz
-          unzip -q t.tpz -d t && mv t/templates/* ~/.godot/export_templates/4.2-stable/
-
-      - uses: android-actions/setup-android@v3
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-python@v5
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          python-version: '3.11'
 
-      - run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+      - name: Install p4a
+        run: pip install python-for-android cython
 
-      - name: Export APK
+      - name: Build APK
         run: |
-          mkdir -p builds
-          ./Godot_v4.2-stable_linux.x86_64 --headless --export-debug "Android" builds/agent007.apk 2>&1
-          echo "EXIT_CODE=$?"
-          ls -la builds/
-
-      - name: Verify APK exists
-        run: |
-          APK=$(find builds/ -name "*.apk" 2>/dev/null | head -1)
-          if [ -z "$APK" ]; then
-            echo "No APK found in builds/. Searching everywhere..."
-            find /home/runner -name "*.apk" 2>/dev/null || echo "No APK found on runner"
-            exit 1
-          fi
-          SIZE=$(stat -c%s "$APK" 2>/dev/null || stat -f%z "$APK" 2>/dev/null)
-          echo "APK: $APK ($SIZE bytes)"
-          if [ "$SIZE" -lt 1000 ]; then
-            echo "APK too small ($SIZE bytes), likely a stub"
-            exit 1
-          fi
-          cp "$APK" builds/agent007.apk
+          p4a apk \
+            --private agent007/ \
+            --package "com.nousresearch.agent007" \
+            --name "Agent 007" \
+            --version 0.1.0 \
+            --bootstrap sdl2 \
+            --requirements python3,sdl2,numpy \
+            --arch arm64-v8a \
+            --permission VIBRATE \
+            --window \
+            --dist-name agent007 \
+            --output builds/
 
       - uses: actions/upload-artifact@v4
         with:
           name: agent007-apk
           path: builds/*.apk
-          if-no-files-found: error
