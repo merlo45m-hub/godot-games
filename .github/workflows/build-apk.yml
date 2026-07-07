@@ -2,7 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
@@ -32,30 +32,31 @@ jobs:
 
       - run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - name: Export APK and upload as artifact
+      - name: Export APK
         run: |
+          mkdir -p builds
           ./Godot_v4.2-stable_linux.x86_64 --headless --export-debug "Android" builds/agent007.apk 2>&1
-          echo "EXIT=$?"
-          echo "=== LOOKING FOR APK ==="
-          find /home/runner/work -name "*.apk" 2>/dev/null | head -20
-          find . -name "*.apk" 2>/dev/null | head -20
-          echo "=== GRADLE BUILDS ==="
-          find . -path "*/android-gradle-project/*" -name "*.apk" 2>/dev/null | head -10
-          echo "=== BUILDS DIR ==="
-          ls -la builds/ 2>/dev/null
-          # If APK exists in Gradle output, copy it
-          GRADLE_APK=$(find . -path "*/build/outputs/apk/*" -name "*.apk" 2>/dev/null | head -1)
-          if [ -n "$GRADLE_APK" ]; then
-            echo "Found APK at: $GRADLE_APK"
-            cp "$GRADLE_APK" builds/agent007.apk
+          echo "EXIT_CODE=$?"
+          ls -la builds/
+
+      - name: Verify APK exists
+        run: |
+          APK=$(find builds/ -name "*.apk" 2>/dev/null | head -1)
+          if [ -z "$APK" ]; then
+            echo "No APK found in builds/. Searching everywhere..."
+            find /home/runner -name "*.apk" 2>/dev/null || echo "No APK found on runner"
+            exit 1
           fi
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          SIZE=$(stat -c%s "$APK" 2>/dev/null || stat -f%z "$APK" 2>/dev/null)
+          echo "APK: $APK ($SIZE bytes)"
+          if [ "$SIZE" -lt 1000 ]; then
+            echo "APK too small ($SIZE bytes), likely a stub"
+            exit 1
+          fi
+          cp "$APK" builds/agent007.apk
 
       - uses: actions/upload-artifact@v4
         with:
           name: agent007-apk
           path: builds/*.apk
           if-no-files-found: error
-
-      - run: ls -lah builds/
