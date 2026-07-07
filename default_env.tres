@@ -1,0 +1,23 @@
+[gd_resource type="Environment" load_steps=2 format=3 uid="uid://default_env"]
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_top_color = Color(0.05, 0.05, 0.15)
+sky_horizon_color = Color(0.15, 0.15, 0.25)
+sky_curve = 0.5
+ground_bottom_color = Color(0.1, 0.08, 0.05)
+ground_horizon_color = Color(0.1, 0.08, 0.05)
+
+[resource]
+background_mode = 2
+background_sky = SubResource("Sky_1")
+background_color = Color(0, 0, 0, 1)
+tonemap_mode = 2
+tonemap_exposure = 1.0
+ssao_enabled = true
+ssao_radius = 1.0
+ssao_intensity = 1.0
+glow_enabled = true
+glow_levels/1 = 0.1
+glow_levels/2 = 0.1
+glow_intensity = 0.5
+glow_strength = 0.8

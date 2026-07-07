@@ -1,0 +1,28 @@
+# Godot
+.godot/import/
+.godot/editor/
+.godot/global_script_class_cache.cfg
+.godot/export_credentials.cfg
+.import/
+export_presets.cfg
+
+# Build output
+builds/
+*.apk
+*.aab
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

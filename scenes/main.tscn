@@ -1,0 +1,131 @@
+[gd_scene load_steps=4 format=3 uid="uid://main"]
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 0
+background_color = Color(0.08, 0.08, 0.15, 1)
+tonemap_mode = 2
+tonemap_exposure = 1.0
+
+[sub_resource type="WorldEnvironment" id="WorldEnv"]
+environment = SubResource("Env")
+
+[node name="Main" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("WorldEnv")
+
+[node name="DirectionalLight" type="DirectionalLight3D" parent=".""]
+transform = Transform3D(0.707, -0.707, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0)
+shadow_enabled = true
+directional_shadow_max_distance = 50.0
+
+[node name="Level" instance=ExtResource("level")]
+
+[node name="Player" instance=ExtResource("player")]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 1
+
+[node name="StealthIndicator" type="TextureRect" parent="HUD"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 48.0
+offset_bottom = 48.0
+color = Color(0, 1, 0, 0.5)
+
+[node name="MissionLabel" type="Label" parent="HUD"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.0
+anchor_right = 0.5
+anchor_bottom = 0.0
+offset_left = -200.0
+offset_top = 16.0
+offset_right = 200.0
+offset_bottom = 48.0
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+theme_override_font_sizes/font_size = 16
+text = "Infiltrate the facility"
+
+[node name="Crosshair" type="TextureRect" parent="HUD"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 8.0
+offset_bottom = 8.0
+color = Color(1, 1, 1, 0.8)
+
+[node name="HealthBar" type="TextureProgressBar" parent="HUD"]
+layout_mode = 1
+anchors_preset = 2
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -48.0
+offset_right = 216.0
+offset_bottom = -16.0
+value = 100.0
+fill_mode = 0
+tint_progress = Color(0.2, 0.8, 0.2, 1)
+
+[node name="HealthLabel" type="Label" parent="HUD/HealthBar"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 196.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "100 / 100"
+
+[node name="AmmoLabel" type="Label" parent="HUD"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -216.0
+offset_top = -48.0
+offset_right = -16.0
+offset_bottom = -16.0
+horizontal_alignment = 2
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 18
+text = "8 / 30"
+
+[node name="ScoreLabel" type="Label" parent="HUD"]
+layout_mode = 1
+anchors_preset = 14
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = -216.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 48.0
+horizontal_alignment = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.7)
+theme_override_font_sizes/font_size = 14
+text = "SCORE: 0"
+
+[ext_resource type="PackedScene" uid="uid://level" path="res://scenes/level.tscn" id="level"]
+[ext_resource type="PackedScene" uid="uid://player" path="res://scenes/player.tscn" id="player"]

@@ -1,0 +1,26 @@
+[application]
+config/name="Agent 007"
+config/description="Stealth FPS — infiltrate the secret facility"
+run/main_scene="res://scenes/main.tscn"
+config/icon="res://icon.svg"
+
+[rendering]
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+environment/defaults/default_clear_color=Color(0.1, 0.1, 0.2, 1)
+
+[input]
+
+[physics]
+common/enable_pause_aware_picking=true
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/mode=2
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+window/dpi/allow_hidpi=true
+
+[autoload]
+GameManager="*res://scripts/game_manager.gd"
