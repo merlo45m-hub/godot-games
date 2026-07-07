@@ -1,0 +1,43 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'agent007/**'
+      - '.github/workflows/build-apk.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install p4a
+        run: pip install python-for-android cython
+
+      - name: Build APK
+        run: |
+          mkdir -p builds
+          p4a apk \
+            --private agent007/ \
+            --package "com.nousresearch.agent007" \
+            --name "Agent 007" \
+            --version 0.1.0 \
+            --bootstrap sdl2 \
+            --requirements python3,sdl2,numpy \
+            --arch arm64-v8a \
+            --permission VIBRATE \
+            --window \
+            --dist-name agent007 \
+            --output builds/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: agent007-apk
+          path: builds/*.apk
