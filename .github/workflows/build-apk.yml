@@ -53,12 +53,17 @@ jobs:
 
       - name: Export Android APK (Debug)
         id: export
-        continue-on-error: true
         run: |
-          godot --headless --export-debug "Android" ${{ github.workspace }}/builds/agent007-debug.apk 2>&1
-          echo "=== Checking for APK ==="
-          find ${{ github.workspace }}/builds -name "*.apk" -ls 2>/dev/null || echo "No APK found in builds/"
-          ls -la ${{ github.workspace }}/builds/ 2>/dev/null
+          echo "Godot version: $(godot --version)"
+          echo "Working dir: $(pwd)"
+          echo "Project files:"
+          ls -la project.godot scenes/ scripts/
+          echo "--- Export output ---"
+          godot --headless --export-debug "Android" ${{ github.workspace }}/builds/agent007-debug.apk 2>&1; EXITCODE=$?
+          echo "EXIT_CODE=$EXITCODE"
+          echo "--- Post-export check ---"
+          find ${{ github.workspace }}/builds -name "*.apk" -o -name "*.aab" 2>/dev/null || echo "NO APK FOUND"
+          ls -la ${{ github.workspace }}/builds/ 2>/dev/null || echo "builds/ missing"
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
 
