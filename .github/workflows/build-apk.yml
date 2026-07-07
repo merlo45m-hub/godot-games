@@ -3,9 +3,7 @@ name: Build Android APK
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   export-android:
@@ -15,25 +13,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download Godot Headless
-        run: |
-          GODOT_VERSION="4.4"
-          GODOT_FULL="4.4-stable"
-          wget -q https://github.com/godotengine/godot/releases/download/$GODOT_FULL/Godot_v${GODOT_FULL}_linux.x86_64.zip
-          unzip -q Godot_v${GODOT_FULL}_linux.x86_64.zip
-          chmod +x Godot_v${GODOT_FULL}_linux.x86_64
-          mv Godot_v${GODOT_FULL}_linux.x86_64 /usr/local/bin/godot
-          godot --version
-
-      - name: Download Android Export Templates
-        run: |
-          GODOT_FULL="4.4-stable"
-          mkdir -p ~/.godot/export_templates/$GODOT_FULL
-          wget -q https://github.com/godotengine/godot/releases/download/$GODOT_FULL/Godot_v${GODOT_FULL}_export_templates.tpz
-          unzip -q Godot_v${GODOT_FULL}_export_templates.tpz
-          mv templates/* ~/.godot/export_templates/$GODOT_FULL/
-          rm -rf templates
-          ls ~/.godot/export_templates/$GODOT_FULL/
+      - name: Setup Godot
+        uses: abarichello/godot-ci@v4
+        with:
+          version: "4.2"
+          export-template: true
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -47,37 +31,14 @@ jobs:
       - name: Accept Android Licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - name: Create Builds Directory
+      - name: Export Android APK
         run: |
-          mkdir -p ${{ github.workspace }}/builds
+          mkdir -p builds
+          godot --headless --export-debug "Android" builds/agent007.apk 2>&1
+          ls -la builds/
 
-      - name: Export Android APK (Debug)
-        id: export
-        run: |
-          echo "Godot version: $(godot --version)"
-          echo "Working dir: $(pwd)"
-          echo "Project files:"
-          ls -la project.godot scenes/ scripts/
-          echo "--- Export output ---"
-          godot --headless --export-debug "Android" ${{ github.workspace }}/builds/agent007-debug.apk 2>&1; EXITCODE=$?
-          echo "EXIT_CODE=$EXITCODE"
-          echo "--- Post-export check ---"
-          find ${{ github.workspace }}/builds -name "*.apk" -o -name "*.aab" 2>/dev/null || echo "NO APK FOUND"
-          ls -la ${{ github.workspace }}/builds/ 2>/dev/null || echo "builds/ missing"
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
-
-      - name: Export Android APK (Release)
-        if: steps.export.outcome == 'success'
-        run: |
-          godot --headless --export-release "Android" ${{ github.workspace }}/builds/agent007-release.apk 2>&1
-
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: agent007-apk
-          path: ${{ github.workspace }}/builds/*.apk
-          if-no-files-found: error
-
-      - name: List Build Output
-        run: ls -lh builds/
+          path: builds/*.apk
