@@ -4,7 +4,6 @@
 .godot/global_script_class_cache.cfg
 .godot/export_credentials.cfg
 .import/
-export_presets.cfg
 
 # Build output
 builds/
