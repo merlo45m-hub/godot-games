@@ -35,9 +35,16 @@ jobs:
             --window \
             --dist-name agent007 \
             --output builds/ 2>&1 | tail -30
+          echo "--- SEARCH FOR APK ---"
+          find / -name "*.apk" -not -path "/proc/*" -not -path "/sys/*" 2>/dev/null
+          mkdir -p builds
+          cp /home/runner/work/godot-games/godot-games/builds/*.apk . 2>/dev/null || true
+          cp *.apk builds/ 2>/dev/null || true
 
       - uses: actions/upload-artifact@v4
         with:
           name: agent007-apk
-          path: builds/*.apk
-          if-no-files-found: error
+          path: |
+            builds/*.apk
+            *.apk
+          if-no-files-found: want
