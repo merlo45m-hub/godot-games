@@ -1,7 +1,0 @@
-[gd_scene format=3 uid="uid://player"]
-
-[node name="Player" type="CharacterBody3D"]
-groups = ["player"]
-
-[node name="Camera3D" type="Camera3D" parent="."]
-current = true

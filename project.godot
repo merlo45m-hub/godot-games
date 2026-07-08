@@ -1,8 +1,7 @@
 [application]
-
-name="Agent 007"
+config/name="Agent 007"
+config/description="Stealth FPS"
 run/main_scene="res://scenes/main.tscn"
-config/icon="res://icon.svg"
 
 [rendering]
 renderer/rendering_method="mobile"
@@ -11,4 +10,3 @@ renderer/rendering_method="mobile"
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/size/mode=2
-window/stretch/mode="canvas_items"
